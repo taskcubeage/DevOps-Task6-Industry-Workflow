@@ -21,6 +21,12 @@ jobs:
         run: |
           git clone https://x-access-token:${COMPANY_PAT}@github.com/AnushkaTakawale/DevOps-Task6-Industry-Workflow.git company-repo
 
+      - name: Checkout Company development Branch
+        run: |
+          cd company-repo
+          git fetch origin
+          git checkout development
+
       - name: Sync Files
         run: |
           rsync -av --delete \
@@ -37,7 +43,7 @@ jobs:
       - name: Commit and Push
         run: |
           cd company-repo
-          git checkout development || git checkout -b development
           git add .
           git commit -m "Sync Team development to Company development" || echo "No changes to commit"
+          git pull --rebase origin development
           git push origin development
