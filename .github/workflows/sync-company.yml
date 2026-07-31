@@ -5,9 +5,6 @@ on:
     branches:
       - development
 
-permissions:
-  contents: read
-
 jobs:
   sync-company:
     runs-on: ubuntu-latest
@@ -18,22 +15,28 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Show Git Remotes (Debug)
-        run: |
-          git remote -v
-
-      - name: Add Company Remote
+      - name: Clone Company Repository
         env:
           COMPANY_PAT: ${{ secrets.COMPANY_PAT }}
         run: |
-          git remote add company https://x-access-token:${COMPANY_PAT}@github.com/AnushkaTakawale/DevOps-Task6-Industry-Workflow.git
-          git remote -v
+          git clone https://x-access-token:${COMPANY_PAT}@github.com/AnushkaTakawale/DevOps-Task6-Industry-Workflow.git company
 
-      - name: Push Team Development to Company Development
+      - name: Sync Files
         run: |
-          git push company HEAD:development
+          rsync -av --delete \
+            --exclude=".git" \
+            ./ company/
+
+      - name: Configure Git
+        run: |
+          cd company
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and Push
+        run: |
+          cd company
+          git checkout development || git checkout -b development
+          git add .
+          git commit -m "Sync Team development to Company development" || echo "No changes to commit"
+          git push origin development
