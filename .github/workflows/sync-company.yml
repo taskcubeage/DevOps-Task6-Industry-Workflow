@@ -19,23 +19,24 @@ jobs:
         env:
           COMPANY_PAT: ${{ secrets.COMPANY_PAT }}
         run: |
-          git clone https://x-access-token:${COMPANY_PAT}@github.com/AnushkaTakawale/DevOps-Task6-Industry-Workflow.git company
+          git clone https://x-access-token:${COMPANY_PAT}@github.com/AnushkaTakawale/DevOps-Task6-Industry-Workflow.git company-repo
 
       - name: Sync Files
         run: |
           rsync -av --delete \
             --exclude=".git" \
-            ./ company/
+            --exclude="company-repo" \
+            ./ company-repo/
 
       - name: Configure Git
         run: |
-          cd company
+          cd company-repo
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Commit and Push
         run: |
-          cd company
+          cd company-repo
           git checkout development || git checkout -b development
           git add .
           git commit -m "Sync Team development to Company development" || echo "No changes to commit"
